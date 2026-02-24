@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Math Adventure!</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  color: #333;
+  font-size: 18px;
+}
+.container { max-width: 700px; margin: 0 auto; padding: 16px; }
+
+/* --- Login Screen --- */
+#login-screen { display: flex; flex-direction: column; align-items: center; padding-top: 60px; }
+#login-screen h1 { color: #fff; font-size: 2.2em; margin-bottom: 8px; }
+#login-screen .subtitle { color: rgba(255,255,255,0.8); margin-bottom: 32px; font-size: 1.1em; }
+.user-cards { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; margin-bottom: 24px; width: 100%; }
+.user-card {
+  background: #fff; border-radius: 16px; padding: 24px 32px; text-align: center;
+  cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; min-width: 140px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+.user-card:hover { transform: translateY(-4px); box-shadow: 0 8px 25px rgba(0,0,0,0.2); }
+.user-card .avatar { font-size: 3em; margin-bottom: 8px; }
+.user-card .uname { font-weight: 700; font-size: 1.1em; }
+.user-card .ugrade { color: #888; font-size: 0.9em; }
+.add-user-btn {
+  background: rgba(255,255,255,0.2); border: 3px dashed rgba(255,255,255,0.5);
+  border-radius: 16px; padding: 24px 32px; color: #fff; cursor: pointer;
+  font-size: 1.1em; transition: background 0.15s; min-width: 140px; text-align: center;
+}
+.add-user-btn:hover { background: rgba(255,255,255,0.3); }
+
+/* PIN Modal */
+.modal-overlay {
+  display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5); z-index: 100; justify-content: center; align-items: center;
+}
+.modal-overlay.active { display: flex; }
+.modal {
+  background: #fff; border-radius: 20px; padding: 32px; text-align: center;
+  max-width: 360px; width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+}
+.modal h2 { margin-bottom: 16px; }
+.modal .error { color: #e74c3c; font-size: 0.9em; min-height: 1.4em; margin-top: 8px; }
+.pin-input {
+  font-size: 2em; text-align: center; letter-spacing: 12px; width: 160px;
+  border: 2px solid #ddd; border-radius: 12px; padding: 8px; outline: none;
+}
+.pin-input:focus { border-color: #667eea; }
+
+/* Setup form */
+#setup-form { margin-top: 16px; }
+#setup-form input[type="text"] {
+  font-size: 1.2em; padding: 10px 16px; border: 2px solid #ddd; border-radius: 12px;
+  width: 100%; margin-bottom: 12px; outline: none;
+}
+#setup-form input[type="text"]:focus { border-color: #667eea; }
+.grade-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0; }
+.grade-btn {
+  padding: 12px; border: 2px solid #ddd; border-radius: 12px; background: #fff;
+  cursor: pointer; font-size: 1em; font-weight: 600; transition: all 0.15s;
+}
+.grade-btn:hover { border-color: #667eea; background: #f0f0ff; }
+.grade-btn.selected { border-color: #667eea; background: #667eea; color: #fff; }
+.style-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0; }
+.style-btn {
+  padding: 10px 8px; border: 2px solid #ddd; border-radius: 12px; background: #fff;
+  cursor: pointer; font-size: 0.9em; font-weight: 600; transition: all 0.15s; text-align: center;
+}
+.style-btn:hover { border-color: #667eea; background: #f0f0ff; }
+.style-btn.selected { border-color: #667eea; background: #667eea; color: #fff; }
+.style-desc { font-size: 0.75em; font-weight: 400; display: block; margin-top: 2px; opacity: 0.7; }
+.style-btn.selected .style-desc { opacity: 0.9; }
+.btn-primary {
+  background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; border: none;
+  border-radius: 12px; padding: 12px 32px; font-size: 1.1em; font-weight: 600;
+  cursor: pointer; transition: opacity 0.15s; margin-top: 8px;
+}
+.btn-primary:hover { opacity: 0.9; }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-secondary {
+  background: #eee; color: #555; border: none; border-radius: 12px; padding: 10px 24px;
+  font-size: 1em; cursor: pointer; margin-top: 8px;
+}
+.btn-secondary:hover { background: #ddd; }
+
+/* --- Main App --- */
+#app-screen { display: none; }
+.header {
+  display: flex; justify-content: space-between; align-items: center;
+  background: rgba(255,255,255,0.15); border-radius: 16px; padding: 12px 20px;
+  margin-bottom: 16px; color: #fff;
+}
+.header .greeting { font-weight: 700; font-size: 1.1em; }
+.header .grade-badge {
+  background: rgba(255,255,255,0.25); border-radius: 8px; padding: 4px 12px;
+  font-size: 0.85em; margin-left: 8px;
+}
+.header-btns { display: flex; gap: 8px; }
+.icon-btn {
+  background: rgba(255,255,255,0.2); border: none; border-radius: 10px;
+  width: 40px; height: 40px; font-size: 1.3em; cursor: pointer; transition: background 0.15s;
+  display: flex; align-items: center; justify-content: center;
+}
+.icon-btn:hover { background: rgba(255,255,255,0.35); }
+
+/* Topic bar */
+.topic-bar {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; justify-content: center;
+}
+.topic-btn {
+  padding: 8px 16px; border-radius: 20px; border: 2px solid rgba(255,255,255,0.3);
+  background: rgba(255,255,255,0.1); color: #fff; cursor: pointer; font-size: 0.85em;
+  font-weight: 600; transition: all 0.15s;
+}
+.topic-btn:hover { background: rgba(255,255,255,0.25); }
+.topic-btn.active { background: #fff; color: #667eea; border-color: #fff; }
+
+/* Cards */
+.card {
+  background: #fff; border-radius: 20px; padding: 24px; margin-bottom: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+.card h3 { margin-bottom: 12px; font-size: 1.1em; }
+
+/* Pipeline */
+.pipeline-step {
+  display: flex; align-items: center; gap: 12px; padding: 10px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+.pipeline-step:last-child { border-bottom: none; }
+.pipeline-icon { font-size: 1.5em; width: 40px; text-align: center; }
+.pipeline-info { flex: 1; }
+.pipeline-name { font-weight: 700; font-size: 0.95em; }
+.pipeline-desc { font-size: 0.85em; color: #888; }
+.pipeline-status { font-size: 0.85em; font-weight: 600; }
+.status-waiting { color: #bbb; }
+.status-working { color: #f39c12; }
+.status-done { color: #27ae60; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.spinner {
+  display: inline-block; width: 16px; height: 16px; border: 3px solid #f39c12;
+  border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite;
+  vertical-align: middle; margin-right: 4px;
+}
+
+/* Problem area */
+.problem-text { font-size: 1.15em; line-height: 1.6; margin-bottom: 16px; }
+.hint-text { color: #f39c12; font-style: italic; margin-bottom: 12px; display: none; }
+.answer-row { display: flex; gap: 8px; }
+.answer-input {
+  flex: 1; font-size: 1.2em; padding: 12px 16px; border: 2px solid #ddd;
+  border-radius: 12px; outline: none;
+}
+.answer-input:focus { border-color: #667eea; }
+.submit-btn {
+  background: linear-gradient(135deg, #27ae60, #2ecc71); color: #fff; border: none;
+  border-radius: 12px; padding: 12px 24px; font-size: 1.1em; font-weight: 700;
+  cursor: pointer; transition: opacity 0.15s;
+}
+.submit-btn:hover { opacity: 0.9; }
+.submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.action-btns { display: flex; gap: 8px; margin-top: 12px; }
+.hint-btn, .skip-btn {
+  padding: 8px 16px; border-radius: 10px; border: none; font-size: 0.9em;
+  cursor: pointer; font-weight: 600;
+}
+.hint-btn { background: #fff3cd; color: #856404; }
+.skip-btn { background: #f0f0f0; color: #666; }
+
+/* Feedback */
+#feedback-card { display: none; }
+.feedback-result { font-size: 1.3em; font-weight: 700; margin-bottom: 12px; }
+.feedback-result.correct { color: #27ae60; }
+.feedback-result.wrong { color: #e74c3c; }
+.feedback-text { line-height: 1.6; margin-bottom: 16px; }
+.next-btn {
+  background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; border: none;
+  border-radius: 12px; padding: 14px 32px; font-size: 1.1em; font-weight: 700;
+  cursor: pointer; width: 100%;
+}
+.next-btn:hover { opacity: 0.9; }
+
+/* Dashboard */
+.stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+.stat-box { text-align: center; padding: 12px; background: #f8f9fa; border-radius: 12px; }
+.stat-num { font-size: 1.8em; font-weight: 700; color: #667eea; }
+.stat-label { font-size: 0.8em; color: #888; }
+.chart-container { position: relative; height: 200px; margin-bottom: 16px; }
+
+/* Settings modal */
+#settings-modal .modal { max-width: 400px; }
+.settings-field { text-align: left; margin-bottom: 16px; }
+.settings-field label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.95em; }
+.settings-field input {
+  width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 10px;
+  font-size: 1em; outline: none;
+}
+.settings-field input:focus { border-color: #667eea; }
+
+/* Scaffold */
+.scaffold-border { border-left: 5px solid #f39c12 !important; }
+.scaffold-label {
+  display: inline-block; background: #f39c12; color: #fff; font-size: 0.8em;
+  font-weight: 700; padding: 3px 10px; border-radius: 8px; margin-bottom: 10px;
+}
+.scaffold-complete-msg {
+  background: linear-gradient(135deg, #d4edda, #c3e6cb); border-radius: 12px;
+  padding: 16px; margin-bottom: 12px; text-align: center; font-weight: 600;
+  color: #155724; font-size: 1.05em;
+}
+.scaffold-maxed-msg {
+  background: linear-gradient(135deg, #fff3cd, #ffeeba); border-radius: 12px;
+  padding: 16px; margin-bottom: 12px; text-align: center; font-weight: 600;
+  color: #856404; font-size: 1.05em;
+}
+#misconception-info {
+  background: #fff8e1; border-left: 4px solid #f39c12; border-radius: 8px;
+  padding: 12px 16px; margin: 12px 0; display: none;
+}
+#misconception-info .misc-type { font-weight: 700; color: #e67e22; text-transform: capitalize; }
+#misconception-info .misc-detail { color: #555; margin-top: 4px; font-size: 0.95em; }
+#analyzer-status {
+  display: none; text-align: center; padding: 12px; color: #888; font-size: 0.95em;
+}
+#analyzer-status .spinner { margin-right: 8px; }
+.practice-btn {
+  background: linear-gradient(135deg, #f39c12, #e67e22); color: #fff; border: none;
+  border-radius: 12px; padding: 14px 32px; font-size: 1.1em; font-weight: 700;
+  cursor: pointer; width: 100%; margin-bottom: 8px; display: none;
+}
+.practice-btn:hover { opacity: 0.9; }
+
+/* XP Bar */
+.xp-bar-container {
+  background: rgba(255,255,255,0.15); border-radius: 12px; padding: 10px 16px;
+  margin-bottom: 16px; color: #fff;
+}
+.xp-bar-info { display: flex; justify-content: space-between; font-size: 0.85em; margin-bottom: 6px; font-weight: 600; }
+.xp-bar-track { background: rgba(255,255,255,0.2); border-radius: 8px; height: 12px; overflow: hidden; }
+.xp-bar-fill {
+  height: 100%; border-radius: 8px; transition: width 0.6s ease;
+  background: linear-gradient(90deg, #f6d365, #fda085);
+  width: 0%;
+}
+
+/* XP Popup */
+.xp-popup {
+  position: fixed; left: 50%; transform: translateX(-50%); font-size: 1.4em; font-weight: 800;
+  color: #f6d365; text-shadow: 0 2px 8px rgba(0,0,0,0.3); pointer-events: none; z-index: 200;
+  animation: xpFloat 1.5s ease-out forwards;
+}
+@keyframes xpFloat {
+  0% { opacity: 1; top: 50%; }
+  100% { opacity: 0; top: 30%; }
+}
+
+/* Level Up Overlay */
+.levelup-overlay {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.6); z-index: 300; display: flex;
+  justify-content: center; align-items: center;
+}
+.levelup-box {
+  background: #fff; border-radius: 24px; padding: 40px 48px; text-align: center;
+  animation: bounceIn 0.5s ease; box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+}
+.levelup-box .star { font-size: 4em; display: block; margin-bottom: 12px; }
+.levelup-box h2 { color: #667eea; margin-bottom: 8px; }
+.levelup-box .level-title { font-size: 1.2em; color: #888; margin-bottom: 16px; }
+@keyframes bounceIn {
+  0% { transform: scale(0.3); opacity: 0; }
+  50% { transform: scale(1.05); }
+  70% { transform: scale(0.95); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Streak Badge */
+.streak-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: rgba(255,100,0,0.3); border-radius: 8px; padding: 4px 10px;
+  font-size: 0.95em; font-weight: 700; margin-left: 8px;
+  animation: pulse 1.5s infinite;
+}
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+
+/* Streak Popup */
+.streak-popup {
+  position: fixed; top: 80px; left: 50%; transform: translateX(-50%);
+  background: linear-gradient(135deg, #ff6a00, #ee0979); color: #fff;
+  padding: 12px 28px; border-radius: 16px; font-size: 1.2em; font-weight: 800;
+  z-index: 200; animation: streakSlide 2.5s ease forwards;
+  box-shadow: 0 4px 20px rgba(255,106,0,0.4);
+}
+@keyframes streakSlide {
+  0% { opacity: 0; top: 40px; }
+  15% { opacity: 1; top: 80px; }
+  75% { opacity: 1; top: 80px; }
+  100% { opacity: 0; top: 40px; }
+}
+
+/* Badge Grid */
+.badge-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 10px; margin-top: 8px;
+}
+.badge-item {
+  text-align: center; padding: 12px 6px; border-radius: 12px;
+  background: #f8f9fa; transition: transform 0.15s;
+}
+.badge-item:hover { transform: translateY(-2px); }
+.badge-item .badge-icon { font-size: 2em; display: block; margin-bottom: 4px; }
+.badge-item .badge-name { font-size: 0.75em; font-weight: 600; color: #333; }
+.badge-item .badge-desc { font-size: 0.65em; color: #888; margin-top: 2px; }
+.badge-item.locked { opacity: 0.35; filter: grayscale(1); }
+
+/* Achievement Toast */
+.achievement-toast {
+  position: fixed; right: 20px; top: 20px; background: #fff; border-radius: 16px;
+  padding: 16px 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.2); z-index: 250;
+  display: flex; align-items: center; gap: 12px; min-width: 260px;
+  animation: toastSlide 3.5s ease forwards;
+}
+.achievement-toast .toast-icon { font-size: 2.2em; }
+.achievement-toast .toast-info { flex: 1; }
+.achievement-toast .toast-title { font-weight: 700; font-size: 0.95em; color: #333; }
+.achievement-toast .toast-label { font-size: 0.75em; color: #667eea; font-weight: 600; text-transform: uppercase; }
+@keyframes toastSlide {
+  0% { opacity: 0; right: -300px; }
+  10% { opacity: 1; right: 20px; }
+  80% { opacity: 1; right: 20px; }
+  100% { opacity: 0; right: -300px; }
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  body { font-size: 16px; }
+  .container { padding: 12px; }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+  .grade-grid { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== LOGIN SCREEN ===== -->
+<div id="login-screen" class="container">
+  <h1>Math Adventure!</h1>
+  <p class="subtitle">Choose your profile to start learning</p>
+  <div class="user-cards" id="user-cards"></div>
+  <div class="add-user-btn" onclick="showSetupModal()">
+    <div style="font-size:2em;">+</div>
+    <div>New Student</div>
+  </div>
+</div>
+
+<!-- PIN Modal -->
+<div class="modal-overlay" id="pin-modal">
+  <div class="modal">
+    <h2 id="pin-modal-title">Enter PIN</h2>
+    <div style="margin: 16px 0;">
+      <input type="password" class="pin-input" id="pin-input" maxlength="4" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
+    </div>
+    <div class="error" id="pin-error"></div>
+    <button class="btn-primary" onclick="submitPin()">Go!</button>
+    <br>
+    <button class="btn-secondary" onclick="closeModal('pin-modal')">Back</button>
+  </div>
+</div>
+
+<!-- Setup (New Student) Modal -->
+<div class="modal-overlay" id="setup-modal">
+  <div class="modal">
+    <h2>New Student</h2>
+    <div id="setup-form">
+      <input type="text" id="setup-name" placeholder="Your name" maxlength="20">
+      <input type="password" class="pin-input" id="setup-pin" maxlength="4" inputmode="numeric" pattern="[0-9]*" placeholder="PIN" style="width:100%;letter-spacing:8px;font-size:1.3em;">
+      <p style="font-size:0.85em;color:#888;margin-bottom:12px;">Pick a 4-digit PIN you'll remember!</p>
+      <p style="font-weight:600;margin-bottom:8px;">What grade are you in?</p>
+      <div class="grade-grid" id="setup-grades"></div>
+      <p style="font-weight:600;margin-bottom:8px;margin-top:12px;">Learning Style</p>
+      <div class="style-grid" id="setup-styles"></div>
+      <div class="error" id="setup-error"></div>
+      <button class="btn-primary" onclick="submitSetup()">Start Learning!</button>
+      <br>
+      <button class="btn-secondary" onclick="closeModal('setup-modal')">Back</button>
+    </div>
+  </div>
+</div>
+
+<!-- Settings Modal -->
+<div class="modal-overlay" id="settings-modal">
+  <div class="modal">
+    <h2>Settings</h2>
+    <div class="settings-field">
+      <label>Name</label>
+      <input type="text" id="settings-name" maxlength="20">
+    </div>
+    <div class="settings-field">
+      <label>Grade</label>
+      <div class="grade-grid" id="settings-grades"></div>
+    </div>
+    <div class="settings-field">
+      <label>Learning Style</label>
+      <div class="style-grid" id="settings-styles"></div>
+    </div>
+    <div class="settings-field">
+      <label>New PIN (leave blank to keep current)</label>
+      <input type="password" id="settings-pin" maxlength="4" inputmode="numeric" pattern="[0-9]*" placeholder="****">
+    </div>
+    <div class="error" id="settings-error"></div>
+    <button class="btn-primary" onclick="saveSettings()">Save</button>
+    <br>
+    <button class="btn-secondary" onclick="closeModal('settings-modal')">Cancel</button>
+    <br>
+    <button class="btn-secondary" style="color:#e74c3c;margin-top:4px;" onclick="logout()">Logout</button>
+  </div>
+</div>
+
+<!-- ===== MAIN APP ===== -->
+<div id="app-screen" class="container">
+  <div class="header">
+    <div>
+      <span class="greeting" id="greeting"></span>
+      <span class="grade-badge" id="grade-badge"></span>
+      <span class="streak-badge" id="streak-badge" style="display:none;">
+        <span id="streak-fire"></span><span id="streak-count"></span>
+      </span>
+    </div>
+    <div class="header-btns">
+      <button class="icon-btn" onclick="openSettings()" title="Settings">&#9881;</button>
+      <button class="icon-btn" onclick="logout()" title="Logout">&#x1F6AA;</button>
+    </div>
+  </div>
+
+  <!-- XP Bar -->
+  <div class="xp-bar-container" id="xp-bar-container">
+    <div class="xp-bar-info">
+      <span id="xp-level">Lv.1 Beginner</span>
+      <span id="xp-amount">0 XP</span>
+    </div>
+    <div class="xp-bar-track"><div class="xp-bar-fill" id="xp-bar-fill"></div></div>
+  </div>
+
+  <!-- Topic Selection -->
+  <div class="topic-bar" id="topic-bar"></div>
+
+  <!-- Pipeline Card -->
+  <div class="card" id="pipeline-card" style="display:none;">
+    <h3>Agent Pipeline</h3>
+    <div id="pipeline-steps"></div>
+  </div>
+
+  <!-- Problem Card -->
+  <div class="card" id="problem-card" style="display:none;">
+    <span class="scaffold-label" id="scaffold-label" style="display:none;"></span>
+    <h3>Problem</h3>
+    <div class="problem-text" id="problem-text"></div>
+    <div class="hint-text" id="hint-text"></div>
+    <div class="answer-row">
+      <input type="text" class="answer-input" id="answer-input" placeholder="Your answer..." inputmode="decimal" autocomplete="off">
+      <button class="submit-btn" id="submit-btn" onclick="submitAnswer()">Submit</button>
+    </div>
+    <div class="action-btns">
+      <button class="hint-btn" onclick="showHint()">Hint</button>
+      <button class="skip-btn" onclick="skipProblem()">Skip</button>
+    </div>
+  </div>
+
+  <!-- Feedback Card -->
+  <div class="card" id="feedback-card">
+    <div id="scaffold-complete-box"></div>
+    <div class="feedback-result" id="feedback-result"></div>
+    <div class="feedback-text" id="feedback-text"></div>
+    <div id="analyzer-status"><span class="spinner"></span> Analyzing your approach...</div>
+    <div id="misconception-info">
+      <div class="misc-type" id="misc-type"></div>
+      <div class="misc-detail" id="misc-detail"></div>
+    </div>
+    <button class="practice-btn" id="practice-btn" onclick="requestScaffold()">Practice This!</button>
+    <button class="next-btn" onclick="newProblem()">Next Problem</button>
+  </div>
+
+  <!-- New Problem Button (initial state) -->
+  <div id="start-area" style="text-align:center;margin:24px 0;">
+    <button class="next-btn" onclick="newProblem()" id="start-btn">Start!</button>
+  </div>
+
+  <!-- Dashboard -->
+  <div class="card" id="dashboard-card">
+    <h3>Dashboard</h3>
+    <div class="stats-grid" id="stats-grid">
+      <div class="stat-box"><div class="stat-num" id="stat-total">0</div><div class="stat-label">Problems</div></div>
+      <div class="stat-box"><div class="stat-num" id="stat-correct">0</div><div class="stat-label">Correct</div></div>
+      <div class="stat-box"><div class="stat-num" id="stat-pct">0%</div><div class="stat-label">Accuracy</div></div>
+    </div>
+    <div class="chart-container"><canvas id="score-chart"></canvas></div>
+    <div class="chart-container"><canvas id="topic-chart"></canvas></div>
+    <h3 style="margin-top:16px;">Achievements</h3>
+    <div class="badge-grid" id="badge-grid"></div>
+  </div>
+</div>
+
+<script>
+// ===== State =====
+let currentStudent = null;
+let selectedTopic = "Auto";
+let currentProblem = null;
+let loginStudentId = null;
+let settingsGrade = null;
+let setupGrade = null;
+let scoreChart = null;
+let topicChart = null;
+let eventSource = null;
+let isScaffoldMode = false;
+let scaffoldLevel = 0;
+let scaffoldData = null;
+let setupStyle = "common_core";
+let settingsStyle = null;
+
+const CURRICULUM_STYLES = {
+    "common_core": {name: "Common Core", desc: "California standard curriculum"},
+    "rsm": {name: "RSM", desc: "Advanced logic & early algebra"},
+    "singapore": {name: "Singapore Math", desc: "Bar models & mastery approach"},
+};
+
+const AVATARS = ["&#x1F9D1;&#x200D;&#x1F393;","&#x1F466;","&#x1F467;","&#x1F9D2;","&#x1F47E;","&#x1F916;","&#x1F984;","&#x1F43B;"];
+const TOPICS = ["Auto","Addition","Subtraction","Multiplication","Division","Mixed Operations","Fractions","Decimals","Geometry","Word Problems"];
+
+const ACHIEVEMENTS = {
+  "first_correct":     {"name": "First Star",       "icon": "\u2B50",  "desc": "Get your first answer right"},
+  "ten_correct":       {"name": "Perfect Ten",      "icon": "\uD83C\uDFAF",  "desc": "Get 10 answers correct"},
+  "fifty_correct":     {"name": "Half Century",     "icon": "\uD83C\uDFC6",  "desc": "Get 50 answers correct"},
+  "hundred_correct":   {"name": "Century Club",     "icon": "\uD83D\uDC51",  "desc": "Get 100 answers correct"},
+  "streak_3":          {"name": "Hat Trick",        "icon": "\uD83D\uDD25",  "desc": "3 correct in a row"},
+  "streak_5":          {"name": "High Five",        "icon": "\u270B",  "desc": "5 correct in a row"},
+  "streak_10":         {"name": "On Fire",          "icon": "\uD83D\uDCA5",  "desc": "10 correct in a row"},
+  "try_3_topics":      {"name": "Explorer",         "icon": "\uD83C\uDF0D",  "desc": "Try 3 different topics"},
+  "try_5_topics":      {"name": "Adventurer",       "icon": "\uD83E\uDDED",  "desc": "Try 5 different topics"},
+  "ten_problems":      {"name": "Getting Started",  "icon": "\uD83D\uDE80",  "desc": "Attempt 10 problems"},
+  "fifty_problems":    {"name": "Determined",       "icon": "\uD83D\uDCAA",  "desc": "Attempt 50 problems"},
+  "scaffold_win":      {"name": "Comeback Kid",     "icon": "\uD83D\uDCAB",  "desc": "Get a practice problem right"},
+  "scaffold_master":   {"name": "Never Give Up",    "icon": "\uD83E\uDDD7",  "desc": "Complete 5 practice rounds"},
+  "perfect_session_5": {"name": "Flawless",         "icon": "\uD83D\uDC8E",  "desc": "Get 5 in a row without any wrong"},
+  "level_5":           {"name": "Rising Star",      "icon": "\u2B50",  "desc": "Reach Level 5"},
+};
+
+// ===== Init =====
+window.addEventListener("DOMContentLoaded", () => {
+  buildTopicBar();
+  buildGradeGrids();
+  buildStyleGrids();
+  checkSession();
+});
+
+function buildTopicBar() {
+  const bar = document.getElementById("topic-bar");
+  TOPICS.forEach(t => {
+    const btn = document.createElement("button");
+    btn.className = "topic-btn" + (t === "Auto" ? " active" : "");
+    btn.textContent = t;
+    btn.onclick = () => selectTopic(t);
+    bar.appendChild(btn);
+  });
+}
+
+function selectTopic(t) {
+  selectedTopic = t;
+  document.querySelectorAll(".topic-btn").forEach(b => b.classList.toggle("active", b.textContent === t));
+}
+
+function buildGradeGrids() {
+  ["setup-grades","settings-grades"].forEach(id => {
+    const el = document.getElementById(id);
+    for (let g = 1; g <= 6; g++) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "grade-btn";
+      btn.textContent = "Grade " + g;
+      btn.onclick = () => {
+        el.querySelectorAll(".grade-btn").forEach(b => b.classList.remove("selected"));
+        btn.classList.add("selected");
+        if (id === "setup-grades") setupGrade = g;
+        else settingsGrade = g;
+      };
+      el.appendChild(btn);
+    }
+  });
+}
+
+function buildStyleGrids() {
+  ["setup-styles","settings-styles"].forEach(id => {
+    const el = document.getElementById(id);
+    Object.entries(CURRICULUM_STYLES).forEach(([key, info]) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "style-btn" + (id === "setup-styles" && key === "common_core" ? " selected" : "");
+      btn.dataset.style = key;
+      btn.innerHTML = info.name + '<span class="style-desc">' + info.desc + '</span>';
+      btn.onclick = () => {
+        el.querySelectorAll(".style-btn").forEach(b => b.classList.remove("selected"));
+        btn.classList.add("selected");
+        if (id === "setup-styles") setupStyle = key;
+        else settingsStyle = key;
+      };
+      el.appendChild(btn);
+    });
+  });
+}
+
+// ===== Session =====
+async function checkSession() {
+  try {
+    const r = await fetch("/api/student");
+    if (r.ok) {
+      const data = await r.json();
+      if (data.id) { enterApp(data); return; }
+    }
+  } catch(e) {}
+  showLoginScreen();
+}
+
+function showLoginScreen() {
+  document.getElementById("login-screen").style.display = "flex";
+  document.getElementById("app-screen").style.display = "none";
+  loadUsers();
+}
+
+async function loadUsers() {
+  const r = await fetch("/api/students");
+  const users = await r.json();
+  const container = document.getElementById("user-cards");
+  container.innerHTML = "";
+  users.forEach((u, i) => {
+    const card = document.createElement("div");
+    card.className = "user-card";
+    const styleName = (CURRICULUM_STYLES[u.curriculum_style] || CURRICULUM_STYLES["common_core"]).name;
+    card.innerHTML = `<div class="avatar">${AVATARS[i % AVATARS.length]}</div><div class="uname">${esc(u.name)}</div><div class="ugrade">Grade ${u.grade} &middot; ${styleName}</div>`;
+    card.onclick = () => showPinModal(u);
+    container.appendChild(card);
+  });
+}
+
+// ===== PIN =====
+function showPinModal(user) {
+  loginStudentId = user.id;
+  document.getElementById("pin-modal-title").textContent = user.name + "'s PIN";
+  document.getElementById("pin-input").value = "";
+  document.getElementById("pin-error").textContent = "";
+  openModal("pin-modal");
+  setTimeout(() => document.getElementById("pin-input").focus(), 100);
+}
+
+async function submitPin() {
+  const pin = document.getElementById("pin-input").value;
+  if (pin.length !== 4) { document.getElementById("pin-error").textContent = "Enter 4 digits"; return; }
+  const r = await fetch("/api/login", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({student_id: loginStudentId, pin})
+  });
+  if (r.ok) {
+    const data = await r.json();
+    closeModal("pin-modal");
+    enterApp(data);
+  } else {
+    document.getElementById("pin-error").textContent = "Wrong PIN!";
+    document.getElementById("pin-input").value = "";
+    document.getElementById("pin-input").focus();
+  }
+}
+
+// ===== Setup (New Student) =====
+function showSetupModal() {
+  document.getElementById("setup-name").value = "";
+  document.getElementById("setup-pin").value = "";
+  document.getElementById("setup-error").textContent = "";
+  setupGrade = null;
+  setupStyle = "common_core";
+  document.querySelectorAll("#setup-grades .grade-btn").forEach(b => b.classList.remove("selected"));
+  document.querySelectorAll("#setup-styles .style-btn").forEach(b => b.classList.toggle("selected", b.dataset.style === "common_core"));
+  openModal("setup-modal");
+  setTimeout(() => document.getElementById("setup-name").focus(), 100);
+}
+
+async function submitSetup() {
+  const name = document.getElementById("setup-name").value.trim();
+  const pin = document.getElementById("setup-pin").value;
+  if (!name) { document.getElementById("setup-error").textContent = "Enter your name"; return; }
+  if (pin.length !== 4 || !/^\d{4}$/.test(pin)) { document.getElementById("setup-error").textContent = "PIN must be 4 digits"; return; }
+  if (!setupGrade) { document.getElementById("setup-error").textContent = "Pick your grade"; return; }
+  const r = await fetch("/api/setup", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({name, pin, grade: setupGrade, curriculum_style: setupStyle})
+  });
+  if (r.ok) {
+    const data = await r.json();
+    closeModal("setup-modal");
+    enterApp(data);
+  } else {
+    const err = await r.json();
+    document.getElementById("setup-error").textContent = err.error || "Error";
+  }
+}
+
+// ===== Enter App =====
+function enterApp(student) {
+  currentStudent = student;
+  document.getElementById("login-screen").style.display = "none";
+  document.getElementById("app-screen").style.display = "block";
+  document.getElementById("greeting").textContent = "Hi, " + student.name + "!";
+  const styleName = (CURRICULUM_STYLES[student.curriculum_style] || CURRICULUM_STYLES["common_core"]).name;
+  document.getElementById("grade-badge").textContent = "Grade " + student.grade + " \u00B7 " + styleName;
+  resetProblemUI();
+  loadGamificationBar();
+  loadDashboard();
+  connectSSE();
+}
+
+function resetProblemUI() {
+  document.getElementById("pipeline-card").style.display = "none";
+  document.getElementById("problem-card").style.display = "none";
+  document.getElementById("feedback-card").style.display = "none";
+  document.getElementById("start-area").style.display = "block";
+  currentProblem = null;
+}
+
+// ===== Settings =====
+function openSettings() {
+  document.getElementById("settings-name").value = currentStudent.name;
+  document.getElementById("settings-pin").value = "";
+  document.getElementById("settings-error").textContent = "";
+  settingsGrade = currentStudent.grade;
+  settingsStyle = currentStudent.curriculum_style || "common_core";
+  document.querySelectorAll("#settings-grades .grade-btn").forEach((b, i) => {
+    b.classList.toggle("selected", (i + 1) === currentStudent.grade);
+  });
+  document.querySelectorAll("#settings-styles .style-btn").forEach(b => {
+    b.classList.toggle("selected", b.dataset.style === settingsStyle);
+  });
+  openModal("settings-modal");
+}
+
+async function saveSettings() {
+  const name = document.getElementById("settings-name").value.trim();
+  const pin = document.getElementById("settings-pin").value;
+  if (!name) { document.getElementById("settings-error").textContent = "Name required"; return; }
+  if (pin && (pin.length !== 4 || !/^\d{4}$/.test(pin))) {
+    document.getElementById("settings-error").textContent = "PIN must be 4 digits"; return;
+  }
+  const body = {name, grade: settingsGrade, curriculum_style: settingsStyle};
+  if (pin) body.pin = pin;
+  const r = await fetch("/api/setup", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify(body)
+  });
+  if (r.ok) {
+    const data = await r.json();
+    currentStudent = data;
+    document.getElementById("greeting").textContent = "Hi, " + data.name + "!";
+    const styleName = (CURRICULUM_STYLES[data.curriculum_style] || CURRICULUM_STYLES["common_core"]).name;
+    document.getElementById("grade-badge").textContent = "Grade " + data.grade + " \u00B7 " + styleName;
+    closeModal("settings-modal");
+    connectSSE();
+  }
+}
+
+// ===== Logout =====
+async function logout() {
+  await fetch("/api/logout", {method: "POST"});
+  if (eventSource) { eventSource.close(); eventSource = null; }
+  currentStudent = null;
+  currentProblem = null;
+  closeModal("settings-modal");
+  showLoginScreen();
+}
+
+// ===== SSE =====
+function connectSSE() {
+  if (eventSource) eventSource.close();
+  eventSource = new EventSource("/api/events");
+  eventSource.addEventListener("pipeline", (e) => {
+    const data = JSON.parse(e.data);
+    updatePipeline(data);
+  });
+  eventSource.addEventListener("problem", (e) => {
+    const data = JSON.parse(e.data);
+    showProblem(data);
+  });
+  eventSource.addEventListener("feedback", (e) => {
+    const data = JSON.parse(e.data);
+    showFeedback(data);
+  });
+  eventSource.addEventListener("scaffold_ready", (e) => {
+    const data = JSON.parse(e.data);
+    handleScaffoldReady(data);
+  });
+  eventSource.addEventListener("error_msg", (e) => {
+    const data = JSON.parse(e.data);
+    alert("Error: " + data.message);
+    resetProblemUI();
+  });
+  eventSource.onerror = () => {
+    setTimeout(() => { if (currentStudent) connectSSE(); }, 3000);
+  };
+}
+
+// ===== Pipeline =====
+const PIPELINE_AGENTS = {
+  manager:  {icon: "&#x1F9E0;", name: "Learning Manager", desc: "Analyzing student history"},
+  creator:  {icon: "&#x1F4D0;", name: "Problem Creator", desc: "Creating a fun problem"},
+  helper:   {icon: "&#x1F4A1;", name: "Solution Helper", desc: "Explaining step-by-step"},
+  analyst:  {icon: "&#x1F50D;", name: "Misconception Analyst", desc: "Analyzing your mistake"}
+};
+
+function updatePipeline(data) {
+  const card = document.getElementById("pipeline-card");
+  card.style.display = "block";
+  const container = document.getElementById("pipeline-steps");
+  container.innerHTML = "";
+  (data.agents || []).forEach(a => {
+    const info = PIPELINE_AGENTS[a.key] || {icon:"?",name:a.key,desc:""};
+    let statusHtml, statusClass;
+    if (a.status === "working") {
+      statusHtml = '<span class="spinner"></span> Working...';
+      statusClass = "status-working";
+    } else if (a.status === "done") {
+      statusHtml = "Done";
+      statusClass = "status-done";
+    } else {
+      statusHtml = "Waiting";
+      statusClass = "status-waiting";
+    }
+    container.innerHTML += `
+      <div class="pipeline-step">
+        <div class="pipeline-icon">${info.icon}</div>
+        <div class="pipeline-info">
+          <div class="pipeline-name">${info.name}</div>
+          <div class="pipeline-desc">${info.desc}</div>
+        </div>
+        <div class="pipeline-status ${statusClass}">${statusHtml}</div>
+      </div>`;
+  });
+}
+
+// ===== Problem =====
+async function newProblem() {
+  document.getElementById("start-area").style.display = "none";
+  document.getElementById("feedback-card").style.display = "none";
+  document.getElementById("problem-card").style.display = "none";
+  document.getElementById("pipeline-card").style.display = "block";
+  document.getElementById("pipeline-steps").innerHTML = '<div style="text-align:center;padding:16px;color:#888;">Starting...</div>';
+
+  const topic = selectedTopic === "Auto" ? null : selectedTopic;
+  await fetch("/api/new-problem", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({topic})
+  });
+}
+
+function showProblem(data) {
+  currentProblem = data;
+  document.getElementById("pipeline-card").style.display = "none";
+  document.getElementById("feedback-card").style.display = "none";
+  document.getElementById("problem-card").style.display = "block";
+  document.getElementById("problem-text").textContent = data.question;
+  document.getElementById("hint-text").style.display = "none";
+  document.getElementById("hint-text").textContent = "Hint: " + (data.hint || "Think step by step!");
+  document.getElementById("answer-input").value = "";
+  document.getElementById("answer-input").disabled = false;
+  document.getElementById("submit-btn").disabled = false;
+
+  // Scaffold mode styling
+  const card = document.getElementById("problem-card");
+  const label = document.getElementById("scaffold-label");
+  if (data.is_scaffold) {
+    isScaffoldMode = true;
+    scaffoldLevel = data.scaffold_level || 1;
+    card.classList.add("scaffold-border");
+    label.textContent = "Practice Round " + scaffoldLevel + "/2";
+    label.style.display = "inline-block";
+  } else {
+    isScaffoldMode = false;
+    scaffoldLevel = 0;
+    card.classList.remove("scaffold-border");
+    label.style.display = "none";
+  }
+
+  document.getElementById("answer-input").focus();
+}
+
+function showHint() {
+  document.getElementById("hint-text").style.display = "block";
+}
+
+async function submitAnswer() {
+  const val = document.getElementById("answer-input").value.trim();
+  if (!val) return;
+  document.getElementById("answer-input").disabled = true;
+  document.getElementById("submit-btn").disabled = true;
+
+  // Show pipeline for helper
+  document.getElementById("pipeline-card").style.display = "block";
+  updatePipeline({agents: [{key:"helper", status:"working"}]});
+
+  await fetch("/api/submit-answer", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({answer: val})
+  });
+}
+
+async function skipProblem() {
+  document.getElementById("answer-input").disabled = true;
+  document.getElementById("submit-btn").disabled = true;
+  const r = await fetch("/api/skip", {method: "POST"});
+  const skipData = await r.json();
+  const feedbackData = {is_correct: false, correct_answer: currentProblem?.correct_answer, feedback: "Skipped! The answer was " + (currentProblem?.correct_answer || "?") + ". Let's try another one!", skipped: true};
+  showFeedback(feedbackData);
+  if (skipData.xp_total !== undefined) {
+    updateGamification(skipData);
+  }
+  updateStreak(0);
+}
+
+function handleScaffoldReady(data) {
+  scaffoldData = data;
+  // Hide the analyzing spinner
+  document.getElementById("analyzer-status").style.display = "none";
+
+  if (!data.available) return;
+
+  // Show misconception info
+  const infoEl = document.getElementById("misconception-info");
+  infoEl.style.display = "block";
+  document.getElementById("misc-type").textContent = data.misconception_type || "Error";
+  document.getElementById("misc-detail").textContent = data.misconception_detail || "";
+
+  // Show Practice button
+  document.getElementById("practice-btn").style.display = "block";
+  document.getElementById("practice-btn").textContent =
+    "Practice This! (Round " + (data.scaffold_level || 1) + "/2)";
+}
+
+async function requestScaffold() {
+  document.getElementById("feedback-card").style.display = "none";
+  document.getElementById("pipeline-card").style.display = "block";
+  document.getElementById("pipeline-steps").innerHTML = '<div style="text-align:center;padding:16px;color:#888;">Preparing practice problem...</div>';
+
+  await fetch("/api/scaffold-problem", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({})
+  });
+}
+
+function showFeedback(data) {
+  document.getElementById("pipeline-card").style.display = "none";
+  document.getElementById("problem-card").style.display = "none";
+  document.getElementById("feedback-card").style.display = "block";
+
+  // Reset scaffold UI elements
+  const completeBox = document.getElementById("scaffold-complete-box");
+  completeBox.innerHTML = "";
+  document.getElementById("analyzer-status").style.display = "none";
+  document.getElementById("misconception-info").style.display = "none";
+  document.getElementById("practice-btn").style.display = "none";
+
+  const resultEl = document.getElementById("feedback-result");
+  if (data.skipped) {
+    resultEl.className = "feedback-result wrong";
+    resultEl.textContent = "Skipped";
+  } else if (data.is_correct) {
+    resultEl.className = "feedback-result correct";
+    resultEl.textContent = "Correct! The answer is " + data.correct_answer + "!";
+    if (data.scaffold_complete) {
+      completeBox.innerHTML = '<div class="scaffold-complete-msg">&#x1F389; Great job! You mastered it! Back to normal problems.</div>';
+      isScaffoldMode = false;
+      scaffoldLevel = 0;
+      scaffoldData = null;
+    }
+  } else {
+    resultEl.className = "feedback-result wrong";
+    resultEl.textContent = "Not quite... The answer was " + data.correct_answer;
+    if (data.scaffold_maxed) {
+      completeBox.innerHTML = '<div class="scaffold-maxed-msg">No worries! Let\'s move on and try something different. You\'ll get it next time!</div>';
+      isScaffoldMode = false;
+      scaffoldLevel = 0;
+      scaffoldData = null;
+    } else if (data.analyzing) {
+      // Show analyzing spinner — will be updated by scaffold_ready event
+      document.getElementById("analyzer-status").style.display = "block";
+    }
+  }
+  document.getElementById("feedback-text").textContent = data.feedback || "";
+
+  // Gamification integration
+  if (data.xp_earned !== undefined) {
+    updateGamification(data);
+    updateStreak(data.streak || 0);
+    handleNewAchievements(data);
+    if (data.is_correct && !data.skipped) celebrate('correct');
+    if (data.scaffold_complete) setTimeout(() => celebrate('scaffold_complete'), 400);
+  }
+  loadDashboard();
+}
+
+// Handle Enter key
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    if (document.getElementById("pin-modal").classList.contains("active")) { submitPin(); return; }
+    if (document.getElementById("setup-modal").classList.contains("active")) { submitSetup(); return; }
+    const answerInput = document.getElementById("answer-input");
+    if (document.getElementById("problem-card").style.display !== "none" && !answerInput.disabled) {
+      submitAnswer();
+    }
+  }
+});
+
+// ===== Dashboard =====
+async function loadDashboard() {
+  try {
+    const [statsR, scoreR] = await Promise.all([
+      fetch("/api/stats"),
+      fetch("/api/score-over-time")
+    ]);
+    const stats = await statsR.json();
+    const scoreData = await scoreR.json();
+
+    document.getElementById("stat-total").textContent = stats.total;
+    document.getElementById("stat-correct").textContent = stats.correct;
+    document.getElementById("stat-pct").textContent = stats.pct + "%";
+
+    // Score over time chart
+    if (scoreChart) scoreChart.destroy();
+    const ctx1 = document.getElementById("score-chart").getContext("2d");
+    scoreChart = new Chart(ctx1, {
+      type: "line",
+      data: {
+        labels: scoreData.map(d => d.problem_num),
+        datasets: [{
+          label: "Accuracy %",
+          data: scoreData.map(d => d.running_pct),
+          borderColor: "#667eea",
+          backgroundColor: "rgba(102,126,234,0.1)",
+          fill: true, tension: 0.3, pointRadius: 4,
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        scales: { y: { min: 0, max: 100, ticks: { callback: v => v + "%" } } },
+        plugins: { legend: { display: false } }
+      }
+    });
+
+    // Topic chart
+    if (topicChart) topicChart.destroy();
+    const topics = Object.entries(stats.topics || {});
+    if (topics.length > 0) {
+      const ctx2 = document.getElementById("topic-chart").getContext("2d");
+      topicChart = new Chart(ctx2, {
+        type: "bar",
+        data: {
+          labels: topics.map(([k]) => k),
+          datasets: [{
+            label: "Accuracy %",
+            data: topics.map(([,v]) => v.pct),
+            backgroundColor: topics.map((_, i) =>
+              ["#667eea","#764ba2","#27ae60","#f39c12","#e74c3c","#3498db","#9b59b6","#1abc9c","#e67e22"][i % 9]
+            ),
+            borderRadius: 8,
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          scales: { y: { min: 0, max: 100, ticks: { callback: v => v + "%" } } },
+          plugins: { legend: { display: false } }
+        }
+      });
+    }
+    loadBadges();
+  } catch(e) { console.error("Dashboard error:", e); }
+}
+
+// ===== Gamification =====
+function celebrate(type) {
+  if (typeof confetti !== 'function') return;
+  if (type === 'correct') {
+    confetti({ particleCount: 40, spread: 60, origin: { y: 0.7 }, colors: ['#667eea','#27ae60','#f6d365'] });
+  } else if (type === 'streak') {
+    confetti({ particleCount: 80, spread: 100, origin: { y: 0.6 }, colors: ['#ff6a00','#ee0979','#f6d365'] });
+  } else if (type === 'levelup') {
+    confetti({ particleCount: 150, spread: 120, startVelocity: 45, origin: { y: 0.5 } });
+    setTimeout(() => confetti({ particleCount: 100, angle: 60, spread: 80, origin: { x: 0, y: 0.6 } }), 200);
+    setTimeout(() => confetti({ particleCount: 100, angle: 120, spread: 80, origin: { x: 1, y: 0.6 } }), 400);
+  } else if (type === 'achievement') {
+    confetti({ particleCount: 60, spread: 70, origin: { x: 0.8, y: 0.2 }, colors: ['#ffd700','#ff6a00','#667eea'] });
+  } else if (type === 'scaffold_complete') {
+    confetti({ particleCount: 50, spread: 80, origin: { y: 0.65 }, colors: ['#f39c12','#27ae60','#fff'] });
+  }
+}
+
+function updateGamification(data) {
+  const levelEl = document.getElementById("xp-level");
+  const amountEl = document.getElementById("xp-amount");
+  const fillEl = document.getElementById("xp-bar-fill");
+
+  if (data.level !== undefined) {
+    levelEl.textContent = "Lv." + data.level + " " + (data.level_title || "");
+  }
+  if (data.xp_total !== undefined) {
+    amountEl.textContent = data.xp_total + " XP";
+  }
+  if (data.xp_progress_pct !== undefined) {
+    fillEl.style.width = data.xp_progress_pct + "%";
+  }
+  if (data.xp_earned && data.xp_earned > 0) {
+    showXpPopup(data.xp_earned);
+  }
+  if (data.leveled_up) {
+    setTimeout(() => showLevelUp(data.level, data.level_title), 600);
+  }
+}
+
+function showXpPopup(amount) {
+  const el = document.createElement("div");
+  el.className = "xp-popup";
+  el.textContent = "+" + amount + " XP";
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1600);
+}
+
+function showLevelUp(level, title) {
+  celebrate('levelup');
+  const overlay = document.createElement("div");
+  overlay.className = "levelup-overlay";
+  overlay.innerHTML = `<div class="levelup-box">
+    <span class="star">\u2B50</span>
+    <h2>Level Up!</h2>
+    <div class="level-title">Level ${level} - ${title || ''}</div>
+    <button class="btn-primary" onclick="this.closest('.levelup-overlay').remove()">Awesome!</button>
+  </div>`;
+  document.body.appendChild(overlay);
+  setTimeout(() => overlay.remove(), 8000);
+}
+
+function updateStreak(streak) {
+  const badge = document.getElementById("streak-badge");
+  const fire = document.getElementById("streak-fire");
+  const count = document.getElementById("streak-count");
+  if (streak >= 2) {
+    badge.style.display = "inline-flex";
+    count.textContent = streak;
+    if (streak >= 10) fire.textContent = "\uD83D\uDD25\uD83D\uDD25\uD83D\uDD25";
+    else if (streak >= 5) fire.textContent = "\uD83D\uDD25\uD83D\uDD25";
+    else fire.textContent = "\uD83D\uDD25";
+    // Show milestone popup
+    if ([3,5,10,20].includes(streak)) {
+      showStreakMilestone(streak);
+    }
+  } else {
+    badge.style.display = "none";
+  }
+}
+
+function showStreakMilestone(streak) {
+  celebrate('streak');
+  const el = document.createElement("div");
+  el.className = "streak-popup";
+  const labels = {3:"HAT TRICK!", 5:"HIGH FIVE!", 10:"ON FIRE!", 20:"UNSTOPPABLE!"};
+  el.textContent = "\uD83D\uDD25 " + (labels[streak] || streak + " Streak!") + " " + streak + " in a row!";
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 2600);
+}
+
+async function loadGamificationBar() {
+  try {
+    const r = await fetch("/api/gamification");
+    const data = await r.json();
+    updateGamification({
+      level: data.level,
+      level_title: data.level_title,
+      xp_total: data.xp,
+      xp_progress_pct: data.xp_progress_pct,
+    });
+    updateStreak(data.streak || 0);
+  } catch(e) { console.error("Gamification load error:", e); }
+}
+
+async function loadBadges() {
+  try {
+    const r = await fetch("/api/achievements");
+    const data = await r.json();
+    const grid = document.getElementById("badge-grid");
+    grid.innerHTML = "";
+    const unlockedKeys = new Set((data.unlocked || []).map(a => a.key));
+    const allKeys = Object.keys(data.all || ACHIEVEMENTS);
+    allKeys.forEach(key => {
+      const info = (data.all || ACHIEVEMENTS)[key];
+      const unlocked = unlockedKeys.has(key);
+      const item = document.createElement("div");
+      item.className = "badge-item" + (unlocked ? "" : " locked");
+      item.innerHTML = `<span class="badge-icon">${info.icon}</span><div class="badge-name">${info.name}</div><div class="badge-desc">${info.desc}</div>`;
+      grid.appendChild(item);
+    });
+  } catch(e) { console.error("Badges load error:", e); }
+}
+
+function showAchievementToast(achievement) {
+  celebrate('achievement');
+  const el = document.createElement("div");
+  el.className = "achievement-toast";
+  el.innerHTML = `<span class="toast-icon">${achievement.icon || '\u2B50'}</span>
+    <div class="toast-info">
+      <div class="toast-label">Achievement Unlocked!</div>
+      <div class="toast-title">${achievement.name || achievement.key}</div>
+    </div>`;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 3600);
+}
+
+function handleNewAchievements(data) {
+  if (!data.new_achievements || data.new_achievements.length === 0) return;
+  data.new_achievements.forEach((ach, i) => {
+    setTimeout(() => showAchievementToast(ach), i * 1200);
+  });
+}
+
+// ===== Helpers =====
+function openModal(id) { document.getElementById(id).classList.add("active"); }
+function closeModal(id) { document.getElementById(id).classList.remove("active"); }
+function esc(s) { const d = document.createElement("div"); d.textContent = s; return d.innerHTML; }
+</script>
+</body>
+</html>

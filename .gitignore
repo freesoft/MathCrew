@@ -1,0 +1,53 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environment
+bin/
+lib/
+lib64
+include/
+share/
+pyvenv.cfg
+.venv/
+venv/
+env/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Environment / Secrets
+.env
+.env.*
+*.key
+*.pem
+*.crt
+*.secret
+credentials.json
+token.json
+secrets.yaml
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Byte-compiled / temp
+*.bak
+*.tmp
