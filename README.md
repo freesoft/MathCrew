@@ -33,9 +33,9 @@ Built as a personal project to help my daughter practice math at home, and as an
 |:---:|:---:|
 | ![Wrong](screenshots/06_wrong_answer_feedback.png) | ![Correct](screenshots/07_correct_answer.png) |
 
-| Dashboard | Achievements |
-|:---:|:---:|
-| ![Dashboard](screenshots/08_dashboard.png) | ![Achievements](screenshots/09_achievements.png) |
+| Dashboard + Achievements |
+|:---:|
+| ![Dashboard](screenshots/08_dashboard.png) |
 
 ---
 
