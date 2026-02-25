@@ -15,7 +15,10 @@ warnings.filterwarnings("ignore")
 from dotenv import load_dotenv
 load_dotenv()
 
+import secrets
 from starlette.applications import Starlette
+from starlette.middleware import Middleware
+from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.routing import Route
 from starlette.responses import HTMLResponse, JSONResponse
 from starlette.requests import Request
@@ -67,6 +70,26 @@ def _set_cookie(resp, key, value, max_age=86400*30):
     resp.set_cookie(key, value, max_age=max_age,
                     httponly=True, samesite="lax",
                     secure=SECURE_COOKIES)
+
+CSRF_SAFE_METHODS = {"GET", "HEAD", "OPTIONS"}
+
+class CSRFMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        csrf_token = request.cookies.get("csrf_token")
+        if not csrf_token:
+            csrf_token = secrets.token_hex(32)
+
+        if request.method not in CSRF_SAFE_METHODS:
+            header_token = request.headers.get("x-csrf-token", "")
+            if not csrf_token or header_token != csrf_token:
+                return JSONResponse({"error": "CSRF token mismatch"}, status_code=403)
+
+        response = await call_next(request)
+        # Set csrf_token cookie (NOT httponly — JS needs to read it)
+        response.set_cookie("csrf_token", csrf_token, max_age=86400*30,
+                            httponly=False, samesite="lax",
+                            secure=SECURE_COOKIES)
+        return response
 try:
     if USE_LOCAL:
         local_llm = LLM(model="ollama/gemma3:4b", base_url="http://localhost:11434")
@@ -1006,7 +1029,7 @@ routes = [
     Route("/api/events", api_events),
 ]
 
-app = Starlette(routes=routes)
+app = Starlette(routes=routes, middleware=[Middleware(CSRFMiddleware)])
 
 if __name__ == "__main__":
     import uvicorn
