@@ -293,4 +293,6 @@ level = min(int(0.4 * sqrt(xp)) + 1, 50)
 
 ## License
 
-MIT
+[PolyForm Strict 1.0.0](LICENSE.md) — free for personal and non-commercial use.
+
+For commercial use, educational institutions, or schools, please reach out via [LinkedIn](https://github.com/freesoft) (linked on GitHub profile) to request approval.
