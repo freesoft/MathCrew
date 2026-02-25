@@ -2,6 +2,7 @@ import sqlite3
 import os
 from datetime import datetime
 from math import sqrt
+import bcrypt
 
 DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "math_tutor.db")
 
@@ -122,19 +123,41 @@ def get_student(student_id):
     conn.close()
     return dict(row) if row else None
 
+def _hash_pin(pin):
+    return bcrypt.hashpw(pin.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+
+def _verify_pin_hash(pin, hashed):
+    return bcrypt.checkpw(pin.encode("utf-8"), hashed.encode("utf-8"))
+
 def verify_pin(student_id, pin):
     conn = get_conn()
     row = conn.execute("SELECT pin FROM student WHERE id = ?", (student_id,)).fetchone()
     conn.close()
-    if row and row["pin"] == pin:
+    if not row:
+        return False
+    stored = row["pin"]
+    # Support both bcrypt hashes and legacy plaintext PINs
+    if stored.startswith("$2"):
+        return _verify_pin_hash(pin, stored)
+    # Legacy plaintext: verify and upgrade to bcrypt
+    if stored == pin:
+        _migrate_pin(student_id, pin)
         return True
     return False
+
+def _migrate_pin(student_id, pin):
+    """Upgrade a legacy plaintext PIN to bcrypt hash."""
+    conn = get_conn()
+    conn.execute("UPDATE student SET pin = ?, updated_at = datetime('now') WHERE id = ?",
+                 (_hash_pin(pin), student_id))
+    conn.commit()
+    conn.close()
 
 def create_student(name, pin, grade, curriculum_style="common_core"):
     conn = get_conn()
     cur = conn.execute(
         "INSERT INTO student (name, pin, grade, curriculum_style) VALUES (?, ?, ?, ?)",
-        (name, pin, grade, curriculum_style)
+        (name, _hash_pin(pin), grade, curriculum_style)
     )
     student_id = cur.lastrowid
     conn.commit()
@@ -153,7 +176,7 @@ def update_student(student_id, name=None, grade=None, pin=None, curriculum_style
         values.append(grade)
     if pin is not None:
         fields.append("pin = ?")
-        values.append(pin)
+        values.append(_hash_pin(pin))
     if curriculum_style is not None:
         fields.append("curriculum_style = ?")
         values.append(curriculum_style)
