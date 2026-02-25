@@ -27,6 +27,14 @@ from sse_starlette.sse import EventSourceResponse
 from crewai import Agent, Task, Crew, LLM
 import db
 
+def _parse_number(s):
+    """Parse a number string: int, float, or fraction (e.g. '5/6')."""
+    s = s.strip()
+    if "/" in s:
+        parts = s.split("/", 1)
+        return float(parts[0]) / float(parts[1])
+    return float(s)
+
 def _parse_json_lenient(raw):
     """Parse JSON that may contain invalid escapes like LaTeX \\frac{}{} or \\(."""
     try:
@@ -393,15 +401,12 @@ def check_answer_bg(session_id, student, answer_str):
         is_scaffold = problem.get("is_scaffold", False)
         scaffold_level = problem.get("scaffold_level", 0)
 
-        # Parse answer
+        # Parse answer (supports integers, decimals, and fractions like "5/6")
         try:
-            student_num = int(answer_str)
+            student_num = _parse_number(answer_str)
         except ValueError:
-            try:
-                student_num = float(answer_str)
-            except ValueError:
-                send_event(session_id, "error_msg", {"message": "Please enter a number"})
-                return
+            send_event(session_id, "input_error", {"message": "Please enter a number (e.g. 42, 3.5, or 1/2)"})
+            return
 
         # Check correctness
         if correct_answer is not None:

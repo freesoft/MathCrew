@@ -815,6 +815,13 @@ function connectSSE() {
     const data = JSON.parse(e.data);
     handleScaffoldReady(data);
   });
+  eventSource.addEventListener("input_error", (e) => {
+    const data = JSON.parse(e.data);
+    document.getElementById("answer-input").disabled = false;
+    document.getElementById("submit-btn").disabled = false;
+    document.getElementById("answer-input").focus();
+    alert(data.message);
+  });
   eventSource.addEventListener("error_msg", (e) => {
     const data = JSON.parse(e.data);
     alert("Error: " + data.message);
