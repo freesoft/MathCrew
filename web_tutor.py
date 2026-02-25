@@ -61,6 +61,12 @@ gemini_llm = LLM(
 )
 
 USE_LOCAL = os.getenv("USE_LOCAL_LLM", "true").lower() == "true"
+SECURE_COOKIES = os.getenv("SECURE_COOKIES", "false").lower() == "true"
+
+def _set_cookie(resp, key, value, max_age=86400*30):
+    resp.set_cookie(key, value, max_age=max_age,
+                    httponly=True, samesite="lax",
+                    secure=SECURE_COOKIES)
 try:
     if USE_LOCAL:
         local_llm = LLM(model="ollama/gemma3:4b", base_url="http://localhost:11434")
@@ -784,8 +790,8 @@ async def api_login(request: Request):
     student = db.get_student(student_id)
     resp = JSONResponse({"id": student["id"], "name": student["name"], "grade": student["grade"], "curriculum_style": student.get("curriculum_style", "common_core")})
     session_id = f"s{student_id}_{os.urandom(4).hex()}"
-    resp.set_cookie("student_id", str(student_id), max_age=86400*30)
-    resp.set_cookie("session_id", session_id, max_age=86400*30)
+    _set_cookie(resp, "student_id", str(student_id))
+    _set_cookie(resp, "session_id", session_id)
     return resp
 
 async def api_setup(request: Request):
@@ -824,8 +830,8 @@ async def api_setup(request: Request):
         pass
     else:
         session_id = f"s{student_id}_{os.urandom(4).hex()}"
-        resp.set_cookie("student_id", str(student_id), max_age=86400*30)
-        resp.set_cookie("session_id", session_id, max_age=86400*30)
+        _set_cookie(resp, "student_id", str(student_id))
+        _set_cookie(resp, "session_id", session_id)
     return resp
 
 async def api_logout(request: Request):
