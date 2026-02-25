@@ -619,6 +619,25 @@ function buildStyleGrids() {
   });
 }
 
+// ===== CSRF =====
+function getCsrfToken() {
+  const m = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]*)/);
+  return m ? m[1] : "";
+}
+function postJson(url, body) {
+  return fetch(url, {
+    method: "POST",
+    headers: {"Content-Type":"application/json", "X-CSRF-Token": getCsrfToken()},
+    body: JSON.stringify(body)
+  });
+}
+function postEmpty(url) {
+  return fetch(url, {
+    method: "POST",
+    headers: {"X-CSRF-Token": getCsrfToken()}
+  });
+}
+
 // ===== Session =====
 async function checkSession() {
   try {
@@ -665,11 +684,7 @@ function showPinModal(user) {
 async function submitPin() {
   const pin = document.getElementById("pin-input").value;
   if (pin.length !== 4) { document.getElementById("pin-error").textContent = "Enter 4 digits"; return; }
-  const r = await fetch("/api/login", {
-    method: "POST",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({student_id: loginStudentId, pin})
-  });
+  const r = await postJson("/api/login", {student_id: loginStudentId, pin});
   if (r.ok) {
     const data = await r.json();
     closeModal("pin-modal");
@@ -700,11 +715,7 @@ async function submitSetup() {
   if (!name) { document.getElementById("setup-error").textContent = "Enter your name"; return; }
   if (pin.length !== 4 || !/^\d{4}$/.test(pin)) { document.getElementById("setup-error").textContent = "PIN must be 4 digits"; return; }
   if (!setupGrade) { document.getElementById("setup-error").textContent = "Pick your grade"; return; }
-  const r = await fetch("/api/setup", {
-    method: "POST",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({name, pin, grade: setupGrade, curriculum_style: setupStyle})
-  });
+  const r = await postJson("/api/setup", {name, pin, grade: setupGrade, curriculum_style: setupStyle});
   if (r.ok) {
     const data = await r.json();
     closeModal("setup-modal");
@@ -762,11 +773,7 @@ async function saveSettings() {
   }
   const body = {name, grade: settingsGrade, curriculum_style: settingsStyle};
   if (pin) body.pin = pin;
-  const r = await fetch("/api/setup", {
-    method: "POST",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify(body)
-  });
+  const r = await postJson("/api/setup", body);
   if (r.ok) {
     const data = await r.json();
     currentStudent = data;
@@ -780,7 +787,7 @@ async function saveSettings() {
 
 // ===== Logout =====
 async function logout() {
-  await fetch("/api/logout", {method: "POST"});
+  await postEmpty("/api/logout");
   if (eventSource) { eventSource.close(); eventSource = null; }
   currentStudent = null;
   currentProblem = null;
@@ -807,6 +814,13 @@ function connectSSE() {
   eventSource.addEventListener("scaffold_ready", (e) => {
     const data = JSON.parse(e.data);
     handleScaffoldReady(data);
+  });
+  eventSource.addEventListener("input_error", (e) => {
+    const data = JSON.parse(e.data);
+    document.getElementById("answer-input").disabled = false;
+    document.getElementById("submit-btn").disabled = false;
+    document.getElementById("answer-input").focus();
+    alert(data.message);
   });
   eventSource.addEventListener("error_msg", (e) => {
     const data = JSON.parse(e.data);
@@ -865,11 +879,7 @@ async function newProblem() {
   document.getElementById("pipeline-steps").innerHTML = '<div style="text-align:center;padding:16px;color:#888;">Starting...</div>';
 
   const topic = selectedTopic === "Auto" ? null : selectedTopic;
-  await fetch("/api/new-problem", {
-    method: "POST",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({topic})
-  });
+  await postJson("/api/new-problem", {topic});
 }
 
 function showProblem(data) {
@@ -917,17 +927,13 @@ async function submitAnswer() {
   document.getElementById("pipeline-card").style.display = "block";
   updatePipeline({agents: [{key:"helper", status:"working"}]});
 
-  await fetch("/api/submit-answer", {
-    method: "POST",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({answer: val})
-  });
+  await postJson("/api/submit-answer", {answer: val});
 }
 
 async function skipProblem() {
   document.getElementById("answer-input").disabled = true;
   document.getElementById("submit-btn").disabled = true;
-  const r = await fetch("/api/skip", {method: "POST"});
+  const r = await postEmpty("/api/skip");
   const skipData = await r.json();
   const feedbackData = {is_correct: false, correct_answer: currentProblem?.correct_answer, feedback: "Skipped! The answer was " + (currentProblem?.correct_answer || "?") + ". Let's try another one!", skipped: true};
   showFeedback(feedbackData);
@@ -961,11 +967,7 @@ async function requestScaffold() {
   document.getElementById("pipeline-card").style.display = "block";
   document.getElementById("pipeline-steps").innerHTML = '<div style="text-align:center;padding:16px;color:#888;">Preparing practice problem...</div>';
 
-  await fetch("/api/scaffold-problem", {
-    method: "POST",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({})
-  });
+  await postJson("/api/scaffold-problem", {});
 }
 
 function showFeedback(data) {
