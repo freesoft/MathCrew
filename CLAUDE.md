@@ -19,7 +19,7 @@ Python(Starlette) 백엔드 + Vanilla JS 프론트엔드, SQLite, Gemini/Ollama 
 - [ ] **마이그레이션 도구 도입**: try/except ALTER TABLE → Alembic
 
 ### Phase 2: 인증/보안
-- [ ] **비밀번호 해싱**: PIN 평문 비교(`db.py:129`) → bcrypt
+- [x] **비밀번호 해싱**: PIN 평문 비교(`db.py:129`) → bcrypt
 - [ ] **세션 보안 강화**: 쿠키에 `secure`, `httponly`, `samesite` 플래그 추가
 - [ ] **CSRF 토큰**: POST 엔드포인트 보호
 - [ ] **회원가입/인증 플로우**: 이메일 인증 또는 OAuth 추가
