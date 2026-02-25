@@ -1,5 +1,10 @@
 # MathCrew 🧮
 
+[![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![CrewAI](https://img.shields.io/badge/CrewAI-Multi--Agent-FF6B6B)](https://www.crewai.com/)
+[![Gemini](https://img.shields.io/badge/Gemini-2.5_Flash-4285F4?logo=google&logoColor=white)](https://ai.google.dev/)
+[![License: PolyForm Strict](https://img.shields.io/badge/License-PolyForm_Strict_1.0-purple)](LICENSE.md)
+
 **AI-powered adaptive math tutor for kids (Grade 1–6)**
 
 A web-based math learning app for elementary students, powered by a CrewAI multi-agent pipeline with Google Gemini + Ollama hybrid architecture.

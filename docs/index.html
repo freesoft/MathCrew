@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MathCrew — AI-Powered Adaptive Math Tutor</title>
+<meta name="description" content="AI-powered adaptive math tutor for kids (Grade 1-6). 4 AI agents, 3 curriculum styles, gamification, and real-time feedback.">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  color: #333;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* Hero */
+.hero {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  text-align: center;
+  padding: 80px 24px 60px;
+  position: relative;
+}
+.hero::after {
+  content: '';
+  position: absolute;
+  bottom: -40px;
+  left: 0;
+  right: 0;
+  height: 80px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  clip-path: ellipse(55% 100% at 50% 0%);
+  z-index: 0;
+}
+.hero h1 {
+  font-size: 3.2em;
+  font-weight: 800;
+  margin-bottom: 12px;
+  letter-spacing: -0.02em;
+}
+.hero .subtitle {
+  font-size: 1.35em;
+  opacity: 0.92;
+  margin-bottom: 32px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.hero-badges {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 36px;
+}
+.hero-badges span {
+  background: rgba(255,255,255,0.18);
+  backdrop-filter: blur(8px);
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 0.9em;
+  font-weight: 600;
+}
+.cta-group {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 32px;
+  border-radius: 12px;
+  font-size: 1.1em;
+  font-weight: 700;
+  text-decoration: none;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.cta:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+.cta-primary { background: #fff; color: #667eea; }
+.cta-secondary { background: rgba(255,255,255,0.15); color: #fff; border: 2px solid rgba(255,255,255,0.4); }
+
+/* Screenshot Hero */
+.hero-screenshot {
+  position: relative;
+  z-index: 1;
+  max-width: 720px;
+  margin: 40px auto -20px;
+}
+.hero-screenshot img {
+  width: 100%;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+
+/* Sections */
+section {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 80px 24px;
+}
+section h2 {
+  font-size: 2em;
+  font-weight: 800;
+  text-align: center;
+  margin-bottom: 12px;
+  color: #333;
+}
+section .section-sub {
+  text-align: center;
+  color: #666;
+  font-size: 1.1em;
+  margin-bottom: 48px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Feature Cards */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
+}
+.feature-card {
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 16px;
+  padding: 28px;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.feature-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(102,126,234,0.12);
+}
+.feature-icon {
+  font-size: 2.2em;
+  margin-bottom: 12px;
+}
+.feature-card h3 {
+  font-size: 1.15em;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #333;
+}
+.feature-card p {
+  color: #666;
+  font-size: 0.95em;
+  line-height: 1.5;
+}
+
+/* Pipeline */
+.pipeline-section {
+  background: linear-gradient(135deg, #f8f9ff 0%, #f0f0ff 100%);
+  border-radius: 24px;
+  padding: 48px 32px;
+  margin: 0 auto;
+  max-width: 960px;
+}
+.pipeline-flow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 32px;
+}
+.pipeline-agent {
+  background: #fff;
+  border-radius: 14px;
+  padding: 20px 24px;
+  text-align: center;
+  box-shadow: 0 4px 16px rgba(102,126,234,0.1);
+  min-width: 140px;
+}
+.pipeline-agent .agent-icon { font-size: 1.8em; margin-bottom: 6px; }
+.pipeline-agent .agent-name { font-weight: 700; font-size: 1em; color: #333; }
+.pipeline-agent .agent-model { font-size: 0.8em; color: #888; margin-top: 2px; }
+.pipeline-arrow { font-size: 1.6em; color: #667eea; font-weight: 700; }
+
+/* Screenshots */
+.screenshots-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+.screenshots-grid img {
+  width: 100%;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  transition: transform 0.15s;
+}
+.screenshots-grid img:hover {
+  transform: scale(1.02);
+}
+
+/* Quick Start */
+.quickstart {
+  background: #1e1e2e;
+  border-radius: 16px;
+  padding: 32px;
+  color: #cdd6f4;
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  font-size: 0.92em;
+  line-height: 1.8;
+  overflow-x: auto;
+  max-width: 680px;
+  margin: 0 auto;
+}
+.quickstart .comment { color: #6c7086; }
+.quickstart .cmd { color: #a6e3a1; }
+.quickstart .url { color: #89b4fa; }
+
+/* Tech Stack */
+.tech-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 16px;
+  text-align: center;
+}
+.tech-item {
+  background: #f8f9ff;
+  border-radius: 12px;
+  padding: 20px 12px;
+}
+.tech-item .tech-name { font-weight: 700; font-size: 1em; color: #333; }
+.tech-item .tech-desc { font-size: 0.8em; color: #888; margin-top: 4px; }
+
+/* Footer */
+footer {
+  background: #1e1e2e;
+  color: #888;
+  text-align: center;
+  padding: 40px 24px;
+  font-size: 0.9em;
+}
+footer a { color: #89b4fa; text-decoration: none; }
+footer a:hover { text-decoration: underline; }
+footer .footer-links { margin-top: 12px; display: flex; gap: 24px; justify-content: center; }
+
+/* Responsive */
+@media (max-width: 640px) {
+  .hero h1 { font-size: 2.2em; }
+  .hero .subtitle { font-size: 1.1em; }
+  section { padding: 48px 16px; }
+  .pipeline-flow { flex-direction: column; }
+  .pipeline-arrow { transform: rotate(90deg); }
+  .cta { padding: 12px 24px; font-size: 1em; }
+}
+</style>
+</head>
+<body>
+
+<!-- Hero -->
+<div class="hero">
+  <h1>MathCrew</h1>
+  <p class="subtitle">AI-powered adaptive math tutor for kids, Grade 1&#8211;6</p>
+  <div class="hero-badges">
+    <span>4 AI Agents</span>
+    <span>3 Curricula</span>
+    <span>15 Badges</span>
+    <span>Real-time Feedback</span>
+  </div>
+  <div class="cta-group">
+    <a href="https://github.com/freesoft/MathCrew" class="cta cta-primary">
+      <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+      View on GitHub
+    </a>
+    <a href="#quickstart" class="cta cta-secondary">Quick Start</a>
+  </div>
+  <div class="hero-screenshot">
+    <img src="https://raw.githubusercontent.com/freesoft/MathCrew/main/screenshots/03_main_app.png" alt="MathCrew Dashboard">
+  </div>
+</div>
+
+<!-- Features -->
+<section style="padding-top:100px;">
+  <h2>Why MathCrew?</h2>
+  <p class="section-sub">A multi-agent AI tutor that adapts to your child's learning pace, identifies mistakes, and makes math fun.</p>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">&#x1F916;</div>
+      <h3>4 AI Agents</h3>
+      <p>Manager analyzes history, Creator generates problems, Helper gives feedback, Analyst identifies misconceptions &#8212; all working together.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#x1F3AF;</div>
+      <h3>Adaptive Scaffolding</h3>
+      <p>Wrong answers trigger error analysis (computational, conceptual, procedural, careless) and auto-generated practice problems.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#x1F4DA;</div>
+      <h3>3 Curriculum Styles</h3>
+      <p>Common Core, RSM (Russian Math), or Singapore Math &#8212; each with grade-specific scope and pedagogy.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#x1F3C6;</div>
+      <h3>Gamification</h3>
+      <p>XP, 50 levels, streaks, 15 unlockable badges, and confetti celebrations keep kids motivated.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#x26A1;</div>
+      <h3>Problem Bank</h3>
+      <p>Caches generated problems to save LLM calls. Same conditions? Instant problem, zero API cost.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#x1F4CA;</div>
+      <h3>Dashboard &amp; Analytics</h3>
+      <p>Accuracy trends, per-topic performance, achievement overview &#8212; all visualized with Chart.js.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Agent Pipeline -->
+<section>
+  <div class="pipeline-section">
+    <h2>AI Agent Pipeline</h2>
+    <p class="section-sub">Four specialized agents collaborate in sequence, powered by Google Gemini and Ollama.</p>
+    <div class="pipeline-flow">
+      <div class="pipeline-agent">
+        <div class="agent-icon">&#x1F9E0;</div>
+        <div class="agent-name">Manager</div>
+        <div class="agent-model">Gemini 2.5 Flash</div>
+      </div>
+      <div class="pipeline-arrow">&#8594;</div>
+      <div class="pipeline-agent">
+        <div class="agent-icon">&#x270D;&#xFE0F;</div>
+        <div class="agent-name">Creator</div>
+        <div class="agent-model">Gemini 2.5 Flash</div>
+      </div>
+      <div class="pipeline-arrow">&#8594;</div>
+      <div class="pipeline-agent">
+        <div class="agent-icon">&#x1F4AC;</div>
+        <div class="agent-name">Helper</div>
+        <div class="agent-model">Ollama (local)</div>
+      </div>
+      <div class="pipeline-arrow">&#8594;</div>
+      <div class="pipeline-agent">
+        <div class="agent-icon">&#x1F50D;</div>
+        <div class="agent-name">Analyst</div>
+        <div class="agent-model">Gemini 2.5 Flash</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Screenshots -->
+<section>
+  <h2>See It in Action</h2>
+  <p class="section-sub">From login to dashboard &#8212; every step designed to keep kids engaged.</p>
+  <div class="screenshots-grid">
+    <img src="https://raw.githubusercontent.com/freesoft/MathCrew/main/screenshots/01_login_screen.png" alt="Login screen with student profiles" loading="lazy">
+    <img src="https://raw.githubusercontent.com/freesoft/MathCrew/main/screenshots/02_setup_modal.png" alt="New student setup with grade and curriculum selection" loading="lazy">
+    <img src="https://raw.githubusercontent.com/freesoft/MathCrew/main/screenshots/05_problem_displayed.png" alt="Math problem displayed" loading="lazy">
+    <img src="https://raw.githubusercontent.com/freesoft/MathCrew/main/screenshots/04_pipeline_working.png" alt="AI agent pipeline in progress" loading="lazy">
+    <img src="https://raw.githubusercontent.com/freesoft/MathCrew/main/screenshots/06_wrong_answer_feedback.png" alt="Wrong answer with error analysis and scaffolding" loading="lazy">
+    <img src="https://raw.githubusercontent.com/freesoft/MathCrew/main/screenshots/07_correct_answer.png" alt="Correct answer with XP and achievement" loading="lazy">
+  </div>
+</section>
+
+<!-- Dashboard -->
+<section>
+  <h2>Track Progress</h2>
+  <p class="section-sub">Charts, stats, and achievements at a glance.</p>
+  <div class="screenshots-grid" style="grid-template-columns: 1fr 1fr;">
+    <img src="https://raw.githubusercontent.com/freesoft/MathCrew/main/screenshots/08_dashboard.png" alt="Dashboard with accuracy trends and topic breakdown" loading="lazy">
+    <img src="https://raw.githubusercontent.com/freesoft/MathCrew/main/screenshots/09_achievements.png" alt="15 unlockable achievements" loading="lazy">
+  </div>
+</section>
+
+<!-- Quick Start -->
+<section id="quickstart">
+  <h2>Get Started in 5 Minutes</h2>
+  <p class="section-sub">All you need is Python and a free Gemini API key.</p>
+  <div class="quickstart">
+    <span class="comment"># Clone the repo</span><br>
+    <span class="cmd">git clone https://github.com/freesoft/MathCrew.git</span><br>
+    <span class="cmd">cd MathCrew</span><br><br>
+    <span class="comment"># Create virtual environment</span><br>
+    <span class="cmd">python -m venv venv</span><br>
+    <span class="cmd">source venv/bin/activate</span><br><br>
+    <span class="comment"># Install dependencies</span><br>
+    <span class="cmd">pip install "crewai[google-genai]" starlette sse-starlette uvicorn python-dotenv</span><br><br>
+    <span class="comment"># Add your Gemini API key</span><br>
+    <span class="cmd">echo "GEMINI_API_KEY=your_key_here" > .env</span><br><br>
+    <span class="comment"># Run!</span><br>
+    <span class="cmd">python web_tutor.py</span><br>
+    <span class="comment"># &#8594; Open <span class="url">http://localhost:8000</span></span>
+  </div>
+</section>
+
+<!-- Tech Stack -->
+<section>
+  <h2>Built With</h2>
+  <div class="tech-grid">
+    <div class="tech-item">
+      <div class="tech-name">Python</div>
+      <div class="tech-desc">Starlette async</div>
+    </div>
+    <div class="tech-item">
+      <div class="tech-name">CrewAI</div>
+      <div class="tech-desc">Multi-agent orchestration</div>
+    </div>
+    <div class="tech-item">
+      <div class="tech-name">Gemini 2.5</div>
+      <div class="tech-desc">Primary LLM</div>
+    </div>
+    <div class="tech-item">
+      <div class="tech-name">Ollama</div>
+      <div class="tech-desc">Local LLM</div>
+    </div>
+    <div class="tech-item">
+      <div class="tech-name">SQLite</div>
+      <div class="tech-desc">Database</div>
+    </div>
+    <div class="tech-item">
+      <div class="tech-name">Chart.js</div>
+      <div class="tech-desc">Visualizations</div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div>MathCrew &#8212; Made with &#10084;&#65039; for my daughter's math practice</div>
+  <div class="footer-links">
+    <a href="https://github.com/freesoft/MathCrew">GitHub</a>
+    <a href="https://github.com/freesoft/MathCrew/blob/main/LICENSE.md">License</a>
+    <a href="https://github.com/freesoft">@freesoft</a>
+  </div>
+</footer>
+
+</body>
+</html>
