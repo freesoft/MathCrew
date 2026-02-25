@@ -264,6 +264,7 @@ footer .footer-links { margin-top: 12px; display: flex; gap: 24px; justify-conte
     <span>3 Curricula</span>
     <span>15 Badges</span>
     <span>Real-time Feedback</span>
+    <span>Privacy-First</span>
   </div>
   <div class="cta-group">
     <a href="https://github.com/freesoft/MathCrew" class="cta cta-primary">
@@ -390,6 +391,78 @@ footer .footer-links { margin-top: 12px; display: flex; gap: 24px; justify-conte
     <span class="comment"># Run!</span><br>
     <span class="cmd">python web_tutor.py</span><br>
     <span class="comment"># &#8594; Open <span class="url">http://localhost:8000</span></span>
+  </div>
+</section>
+
+<!-- Privacy -->
+<section>
+  <div class="pipeline-section">
+    <h2>&#x1F512; Privacy-First Design</h2>
+    <p class="section-sub">Built for children's safety. Choose how your data is handled.</p>
+    <div class="features-grid" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));">
+      <div class="feature-card" style="border-left: 4px solid #38a169;">
+        <h3>&#x1F3E0; Full Local Mode</h3>
+        <p>Run all 4 agents on Ollama &#8212; no data ever leaves your machine. Ideal for schools and privacy-sensitive deployments.</p>
+      </div>
+      <div class="feature-card" style="border-left: 4px solid #667eea;">
+        <h3>&#x2601;&#xFE0F; Cloud Mode</h3>
+        <p>Use Gemini API with US data residency. API data is not used for model training.</p>
+      </div>
+      <div class="feature-card" style="border-left: 4px solid #ed8936;">
+        <h3>&#x1F6E1;&#xFE0F; Compliance-Ready</h3>
+        <p>Designed with COPPA (children under 13) and FERPA (K-12 schools) requirements in mind.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Local Models -->
+<section>
+  <h2>Local Model Guide</h2>
+  <p class="section-sub">Upgrade your local LLM for stronger math reasoning. No cloud required.</p>
+  <div style="max-width:680px;margin:0 auto;overflow-x:auto;">
+    <table style="width:100%;border-collapse:collapse;font-size:0.95em;">
+      <thead>
+        <tr style="border-bottom:2px solid #667eea;text-align:left;">
+          <th style="padding:12px 8px;">Model</th>
+          <th style="padding:12px 8px;">VRAM</th>
+          <th style="padding:12px 8px;">Math</th>
+          <th style="padding:12px 8px;">Best For</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #eee;">
+          <td style="padding:10px 8px;"><code>gemma3:4b</code></td>
+          <td style="padding:10px 8px;">~3 GB</td>
+          <td style="padding:10px 8px;">Basic</td>
+          <td style="padding:10px 8px;">Low-end hardware</td>
+        </tr>
+        <tr style="border-bottom:1px solid #eee;">
+          <td style="padding:10px 8px;"><code>qwen3:8b</code></td>
+          <td style="padding:10px 8px;">~6 GB</td>
+          <td style="padding:10px 8px;">Good</td>
+          <td style="padding:10px 8px;">8 GB GPU</td>
+        </tr>
+        <tr style="border-bottom:1px solid #eee;background:#f0f0ff;">
+          <td style="padding:10px 8px;font-weight:700;"><code>qwen3:14b</code> &#11088;</td>
+          <td style="padding:10px 8px;">~10 GB</td>
+          <td style="padding:10px 8px;">Strong</td>
+          <td style="padding:10px 8px;">16 GB GPU, recommended</td>
+        </tr>
+        <tr style="border-bottom:1px solid #eee;">
+          <td style="padding:10px 8px;"><code>deepseek-r1:14b</code></td>
+          <td style="padding:10px 8px;">~10 GB</td>
+          <td style="padding:10px 8px;">Strong</td>
+          <td style="padding:10px 8px;">Math-specialized</td>
+        </tr>
+        <tr>
+          <td style="padding:10px 8px;"><code>qwen3:32b</code></td>
+          <td style="padding:10px 8px;">~20 GB</td>
+          <td style="padding:10px 8px;">Closest to Gemini</td>
+          <td style="padding:10px 8px;">24 GB GPU (RTX 4090)</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 </section>
 
