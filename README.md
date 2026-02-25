@@ -296,6 +296,12 @@ level = min(int(0.4 * sqrt(xp)) + 1, 50)
 
 ---
 
+## Support
+
+If MathCrew is helpful for your family, consider supporting the project:
+
+[![Sponsor](https://img.shields.io/badge/Sponsor-%E2%9D%A4-ea4aaa?logo=github-sponsors)](https://github.com/sponsors/freesoft)
+
 ## License
 
 [PolyForm Strict 1.0.0](LICENSE.md) — free for personal and non-commercial use.
