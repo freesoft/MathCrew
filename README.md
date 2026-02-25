@@ -137,6 +137,30 @@ To run the Helper agent locally for faster feedback:
 
 > If Ollama is not installed, set `USE_LOCAL_LLM=false` and all agents will use Gemini.
 
+### Choosing a Local Model
+
+The default `gemma3:4b` is lightweight and good for simple feedback. For stronger math reasoning, consider upgrading:
+
+| Model | VRAM | Math Performance | Best For |
+|-------|------|-----------------|----------|
+| `gemma3:4b` (default) | ~3 GB | Basic | Simple feedback, low-end hardware |
+| `qwen3:8b` | ~6 GB | Good | 8 GB GPU, significant upgrade over gemma3 |
+| `qwen3:14b` | ~10 GB | Strong | **16 GB GPU, recommended for full local mode** |
+| `deepseek-r1:14b` | ~10 GB | Strong (math-specialized) | Math-heavy reasoning tasks |
+| `llama4-scout:17b` | ~12 GB | Strong | Natural English, general purpose |
+| `qwen3:32b` | ~20 GB | Closest to Gemini Flash | 24 GB GPU (RTX 4090 etc.) |
+
+To switch models, just pull and update `web_tutor.py`:
+```bash
+ollama pull qwen3:14b
+```
+```python
+# In web_tutor.py, change the local_llm model:
+local_llm = LLM(model="ollama/qwen3:14b", base_url="http://localhost:11434")
+```
+
+> **Full local mode** (all agents on Ollama, no data leaves your machine) is planned for a future release — ideal for schools and privacy-sensitive deployments.
+
 ---
 
 ## AI Agent Architecture
@@ -219,9 +243,16 @@ Edit LLM configuration in `web_tutor.py`:
 # Change Gemini model
 gemini_llm = LLM(model="gemini/gemini-2.5-pro", api_key=...)
 
-# Change local model
-local_llm = LLM(model="ollama/llama3:8b", base_url="http://localhost:11434")
+# Change local model (see "Choosing a Local Model" section for recommendations)
+local_llm = LLM(model="ollama/qwen3:14b", base_url="http://localhost:11434")
 ```
+
+### Privacy Note
+
+When using cloud LLMs (Gemini, OpenAI), student questions and answers are sent to external servers. For deployments involving minors or school environments, consider:
+- Setting `USE_LOCAL_LLM=true` and using a capable local model (e.g., `qwen3:14b`)
+- US data residency: Gemini API supports US region selection; Azure OpenAI offers US East/West
+- Compliance: COPPA (children under 13) and FERPA (K-12 schools) may apply — see [LICENSE.md](LICENSE.md) for contact info regarding institutional use
 
 ### Editing Curriculum
 
