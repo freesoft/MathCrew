@@ -249,10 +249,21 @@ local_llm = LLM(model="ollama/qwen3:14b", base_url="http://localhost:11434")
 
 ### Privacy Note
 
-When using cloud LLMs (Gemini, OpenAI), student questions and answers are sent to external servers. For deployments involving minors or school environments, consider:
-- Setting `USE_LOCAL_LLM=true` and using a capable local model (e.g., `qwen3:14b`)
-- US data residency: Gemini API supports US region selection; Azure OpenAI offers US East/West
-- Compliance: COPPA (children under 13) and FERPA (K-12 schools) may apply — see [LICENSE.md](LICENSE.md) for contact info regarding institutional use
+When using cloud LLMs (Gemini, OpenAI), student data — names, grade levels, answers, mistakes, and learning history — is sent to external servers. For apps used by children, this matters more than you might think.
+
+**What is COPPA?**
+The Children's Online Privacy Protection Act is a US federal law that regulates online collection of personal information from children under 13. The [2024 amendments](https://www.ftc.gov/legal-library/browse/rules/childrens-online-privacy-protection-rule) (fully effective 2025) strengthen requirements significantly: parental consent is opt-in by default, and operators must minimize data collection. If your child uses an AI tutor that sends their work to cloud servers, COPPA likely applies.
+
+**What is FERPA?**
+The Family Educational Rights and Privacy Act protects student education records in K-12 schools. When a school adopts an EdTech tool, FERPA requires that student data is used only for educational purposes and not shared with third parties for unrelated use. Schools must ensure any cloud service they use has appropriate data handling agreements.
+
+**Why does local mode matter?**
+In local mode (`USE_LOCAL_LLM=true` with all agents on Ollama), your child's name, grade, answers, mistakes, and learning patterns never leave your machine. There is no external data transmission, no third-party data processing, and no legal gray area. This is the simplest path to full compliance.
+
+**For school deployments:**
+- **Recommended**: Full local mode with a capable model (e.g., `qwen3:14b` on 16 GB VRAM)
+- **If cloud is necessary**: Use only services that guarantee US data residency and do not use student data for model training (Gemini API meets both criteria; Azure OpenAI US East/West is another option)
+- See [LICENSE.md](LICENSE.md) for contact info regarding institutional use
 
 ### Editing Curriculum
 
