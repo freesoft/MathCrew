@@ -262,7 +262,7 @@ In local mode (`USE_LOCAL_LLM=true` with all agents on Ollama), your child's nam
 
 **For school deployments:**
 - **Recommended**: Full local mode with a capable model (e.g., `qwen3:14b` on 16 GB VRAM)
-- **If cloud is necessary**: Use only services that guarantee US data residency and do not use student data for model training (Gemini API meets both criteria; Azure OpenAI US East/West is another option)
+- **If cloud is necessary**: Use only services that guarantee US data residency and do not use student data for model training. Gemini API **paid tier** meets both criteria (free tier data may be used for product improvement); Azure OpenAI US East/West is another option
 - See [LICENSE.md](LICENSE.md) for contact info regarding institutional use
 
 ### Editing Curriculum
