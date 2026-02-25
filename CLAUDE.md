@@ -46,7 +46,7 @@ Python(Starlette) 백엔드 + Vanilla JS 프론트엔드, SQLite, Gemini/Ollama 
 - [ ] **FERPA 준수**: K-12 학교용 — 학생 데이터는 교육 목적으로만 사용, 제3자 공유 제한
 - [ ] **완전 로컬 모드**: `LLM_MODE=local` 시 모든 에이전트가 Ollama 사용, 데이터가 서버 밖으로 나가지 않음 (학교/기관용)
 - [ ] **클라우드 모드 데이터 잔류**: 클라우드 LLM 사용 시 US 리전만 허용 (Gemini US 리전 / Azure OpenAI US East·West)
-- [ ] **Privacy Policy 페이지**: 수집 데이터 항목, 저장 위치, LLM 전송 여부 명시
+- [x] **Privacy Policy 페이지**: 수집 데이터 항목, 저장 위치, LLM 전송 여부 명시
 - [ ] **데이터 삭제 기능**: 학생/부모 요청 시 모든 학습 데이터 완전 삭제 API
 - [ ] **LLM 서비스 선택 기준**: 미국 내 데이터 잔류 보장, 학습 데이터 미사용 확인된 서비스만 사용. 중국 서비스(GLM 등) 사용 금지
 - [ ] **완전 로컬 모드 최소 사양**: Qwen3 14B 기준 (16GB VRAM). Gemini Flash 동급은 Qwen3 32B (24GB VRAM). 8GB GPU는 Qwen3 8B. GPU 없으면 클라우드 권장
