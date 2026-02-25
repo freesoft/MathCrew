@@ -4,6 +4,10 @@
 
 A web-based math learning app for elementary students, powered by a CrewAI multi-agent pipeline with Google Gemini + Ollama hybrid architecture.
 
+### Motivation
+
+Built as a personal project to help my daughter practice math at home, and as an experiment with CrewAI's multi-agent orchestration. What started as a simple worksheet generator evolved into a full adaptive tutoring system.
+
 - 4 AI agents collaborate: problem generation → feedback → error analysis → scaffolded practice
 - **Problem Bank** — caches generated problems to save LLM calls (reuses problems with matching conditions)
 - **3 curriculum styles**: Common Core · RSM · Singapore Math
@@ -15,21 +19,23 @@ A web-based math learning app for elementary students, powered by a CrewAI multi
 
 ## Screenshots
 
+![Main App — Dashboard with real learning data](screenshots/03_main_app.png)
+
 | Login | New Student Setup |
 |:---:|:---:|
 | ![Login](screenshots/01_login_screen.png) | ![Setup](screenshots/02_setup_modal.png) |
 
 | Problem | Agent Pipeline |
 |:---:|:---:|
-| ![Problem](screenshots/06_problem_displayed.png) | ![Pipeline](screenshots/05_pipeline_working.png) |
+| ![Problem](screenshots/05_problem_displayed.png) | ![Pipeline](screenshots/04_pipeline_working.png) |
 
 | Wrong Answer + Scaffold | Correct Answer + Achievement |
 |:---:|:---:|
-| ![Wrong](screenshots/07_wrong_answer_feedback.png) | ![Correct](screenshots/08_correct_answer.png) |
+| ![Wrong](screenshots/06_wrong_answer_feedback.png) | ![Correct](screenshots/07_correct_answer.png) |
 
-| Dashboard |
-|:---:|
-| ![Dashboard](screenshots/09_dashboard.png) |
+| Dashboard | Achievements |
+|:---:|:---:|
+| ![Dashboard](screenshots/08_dashboard.png) | ![Achievements](screenshots/09_achievements.png) |
 
 ---
 
@@ -84,7 +90,7 @@ python -m venv venv
 source venv/bin/activate   # Windows: venv\Scripts\activate
 
 # 3. Install dependencies
-pip install crewai starlette sse-starlette uvicorn python-dotenv
+pip install "crewai[google-genai]" starlette sse-starlette uvicorn python-dotenv
 
 # 4. Configure environment variables
 cp .env.example .env       # or create manually
