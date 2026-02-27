@@ -4,6 +4,11 @@
 딸의 수학 교육 + CrewAI 실험용으로 만든 적응형 수학 튜터.
 Python(Starlette) 백엔드 + Vanilla JS 프론트엔드, SQLite, Gemini/Ollama LLM.
 
+## 워크플로우 규칙
+- 커밋 시 항상 피처 브랜치를 만들어서 커밋 → 푸시 → PR 생성
+- 작업 시작 시 관련 GitHub 이슈를 "In Progress"로 업데이트
+- PR 생성 후 관련 GitHub 이슈를 "Done"으로 업데이트
+
 ## 핵심 파일
 - `web_tutor.py` — 웹 서버 + API + CrewAI 에이전트 파이프라인 + Problem Bank
 - `db.py` — SQLite 스키마 + 게이미피케이션 (XP/레벨/업적)
